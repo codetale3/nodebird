@@ -1,0 +1,139 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+{% if user %}
+<div id="upload-content">
+<form action="/post" method="post">
+<textarea name="content" rows="4" cols="70"></textarea>
+<div id="img-preview">
+<img src="" />
+<input type="hidden" id="img-url" name="url"/>
+</div>
+<div>
+<input type="file" id="upload-img"/>
+<label for="upload-img" accept="image/*">사진 업로드</label>
+<button type="submit" id="btn-post-upload">짹짹</button>
+</div>
+</form>
+</div>
+{% endif %}
+
+<div id="post-list">
+{% for twit in twits %}
+<div class="post">
+{% if user.id === twit.User.id %}
+<p>당신의 포스트
+<button class="btn-delete-post" data-id="{{ twit.id }}">트윗 삭제</button>
+<span>{{ twit.Likes.length }}</span>
+</p>
+{% else %}
+<p>{{ twit.User.nick }}님의 포스트
+{% if not followerIdList.includes(twit.User.id) %}
+<button class="btn-follow" data-id="{{ twit.User.id }}" >팔로우 하기</button>
+{% else %}
+<button class="btn-follow-delete" data-id="{{ twit.User.id }}" >팔로우 취소</button>
+{% endif %}
+{% if checkLiker(twit, user.id) %}
+<button class="btn-like-delete" data-id="{{ twit.id }}" >👎</button>
+{% else %}
+<button class="btn-like" data-id="{{ twit.id }}" >👍</button>
+{% endif %}
+<span>{{ twit.Likes.length }}</span>
+</p>
+{% endif %}
+<p>{{ twit.content }}</p>
+{% if twit.img %}
+<img src="{{ twit.img }}" />
+{% endif %}
+</div>
+
+{% endfor %}
+</div>
+{% endblock %}
+
+
+{% block script %}
+<script>
+
+$('#upload-img').on('change', (e) => {
+    const img = e.target.files[0];
+    const formData = new FormData();
+    formData.append('img', img);
+    axios.post('/post/img', formData)
+        .then((res) => {
+            console.log($('#img-preview').find('img'));
+            $('#img-preview').find('img').attr('src', res.data.url);
+            $('#img-url').val(res.data.url);
+        })
+
+});
+
+$('.btn-follow').on('click', (e) => {
+    axios.post(`/user/${ e.target.dataset.id }/follow`)
+        .then(() => {
+            location.reload();
+            alert('팔로우 완료');
+        })
+        .catch((e) => {
+            if(e.response.status === 403){
+                alert('로그인 필요!');
+            }
+        });
+});
+
+$('.btn-follow-delete').on('click', (e) => {
+    axios.delete(`/user/${ e.target.dataset.id }/follow`)
+        .then(() => {
+            location.reload();
+            alert('팔로우 취소');
+        })
+        .catch((e) => {
+            if(e.response.status === 403){
+                alert('로그인 필요!');
+            }
+        });
+});
+
+$('.btn-delete-post').on('click', (e) => {
+    axios.delete(`/post/${ e.target.dataset.id }`)
+        .then(() => {
+            location.reload();
+            alert('트윗 삭제');
+        })
+        .catch((e) => {
+            if(e.response.status === 403){
+                alert('로그인 필요!');
+            }
+        });
+});
+
+$('.btn-like').on('click', (e) => {
+    axios.get(`/post/${e.target.dataset.id}/like`)
+        .then(() => {
+            location.reload();
+            alert('좋아요'); 
+        })
+        .catch((e) => {
+            if(e.response.status === 403){
+                alert('로그인 필요!');
+            }
+        })
+})
+
+$('.btn-like-delete').on('click', (e) => {
+    axios.delete(`/post/${e.target.dataset.id}/like`)
+        .then(() => {
+            location.reload();
+            alert('좋아요 취소'); 
+        })
+        .catch((e) => {
+            if(e.response.status === 403){
+                alert('로그인 필요!');
+            }
+        })
+})
+</script>
+{% endblock %}
+
+<!-- 메인창 출력 -->

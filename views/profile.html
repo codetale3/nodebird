@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div id="profile">
+<div class="follow-list">
+<h3>팔로워 리스트</h3>
+{% for follower in user.Followers %}
+<p>{{ follower.nick }}</p>
+{% endfor %}
+
+</div>
+<div class="follow-list">
+<h3>팔로잉 리스트</h3>
+{% for following in user.Followings %}
+<p>{{ following.nick }}</p>
+{% endfor %}
+</div>
+</div>
+{% endblock %}
+
+<!-- 유저 프로필 출력 -->

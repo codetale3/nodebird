@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<script type="text/template" id="user-data-template">
+<div>
+<span><%= username %></span>
+<button class="edit">수정</button>
+<button class="delete">삭제</button>
+</div>
+</script>
+<script type="text/javascript" src="./lib/json2.js"></script>
+<script type="text/javascript" src="./lib/jquery.min.js"></script>
+<script type="text/javascript" src="./lib/underscore-min.js"></script>
+<script type="text/javascript" src="./lib/vue.js"></script>
+<script type="text/javascript" src="./lib/axios.js"></script>
+
+<nav>
+<a href="/">Home</a>
+<a href="/about">About</a>
+</nav>
+<div>
+<form id="form">
+    <input type="text" id="username">
+    <button type="submit">버튼</button>
+</div>
+<div id="list"></div>
+</body>
+<script>
+async function getUser(){
+    try{
+        const res = await axios.get('/users');
+        const users = res.data;
+        const list = $('#list');
+        const userTemplate = _.template($('#user-data-template').html());
+        list.empty();
+        _.map(users, (value, key) => {
+            const userView = $(userTemplate({username: value}));
+            userView.find('button.edit').on('click', async() => {
+                const name = prompt('바꿀 이름을 입력하세요');
+                if(!name){
+                    return alert('이름을 입력하라고');
+                }
+                try{
+                    await axios.put('/users/'+key, { name });
+                    getUser();
+                }catch(err){
+                    console.error(err);
+                }
+            });
+            userView.find('button.delete').on('click', async() => {
+                try{
+                    await axios.delete('/users/'+key);
+                    getUser();
+                }catch(err){
+                    console.error(err);
+                }
+            });
+            list.append(userView);
+        });
+        console.log(users);
+
+    }
+    catch(err){
+        console.error(err);
+    }
+}
+
+$(function(){
+    getUser();
+    $('#form').on('submit', async(e) => {
+        e.preventDefault();
+        const name = e.target.username.value;
+        if(!name){
+            return alert('이름을 입력하라고');
+        }
+        try{
+            await axios.post('/user', { name });
+            getUser();
+        }catch(err){
+            console.error(err);
+        }
+        e.target.username.value = '';
+    });
+})
+</script>
+</html>

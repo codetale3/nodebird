@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>{{ title }}</title>
+<link rel="stylesheet" href="/main.css">
+</head>
+<body>
+
+
+
+
+<div id="container">
+{% if user %}
+<div id="mypage">
+<h3>안녕하세요! {{ user.nick }}님</h3>
+<table id="count-follow">
+<tr>
+<td>팔로워</td>
+<td>팔로잉</td>
+</tr>
+<tr>
+<td class="num">{{ followerCount }}</td>
+<td class="num">{{ followingCount }}</td>
+</tr>
+</table>
+<button class="btn-inter" type="button" onclick="location.href='/'">메인화면</button>
+<button class="btn-inter" type="button" onclick="location.href='/profile'">내 프로필</button>
+<button class="btn-inter" id="change-nick" data-id="{{user.id}}" type="button" >닉변</button>
+<button class="btn-inter" type="button" onclick="location.href='/auth/logout'">로그아웃</button>
+</div>
+{% else %}
+<div id="login">
+<form action="/auth/login" method="post" class="login-form">
+<div class="input-area">
+<label for="user-email">이메일</label>
+<input type="email" name="email" id="user-email" />
+</div>
+<div class="input-area">
+<label for="user-password">비밀번호</label>
+<input type="password" name="password" id="user-password" />
+</div>
+<div class="btn-area">
+<button class="btn-inter" type="submit">로그인</button>
+<button class="btn-inter" type="button">카카오톡</button>
+<button class="btn-inter" type="button" id="btn-join" onclick="location.href='/join'">회원가입</button>
+</div>
+</form>
+</div>
+{% endif %}
+
+
+{% block content %}
+{% endblock %}
+</div>
+
+
+</body>
+<script type="text/javascript" src="../lib/json2.js"></script>
+<script type="text/javascript" src="../lib/jquery.min.js"></script>
+<script type="text/javascript" src="../lib/underscore-min.js"></script>
+<script type="text/javascript" src="../lib/vue.js"></script>
+<script type="text/javascript" src="../lib/axios.js"></script>
+<script>
+$('#change-nick').on('click', (e) => {
+    const new_nick = prompt('변경할 닉네임을 입력하세요');
+    axios.post(`/user/change_nick`, { new_nick })
+        .then(() => {
+            alert('변경 완료')
+            location.reload();
+        })
+        .catch((err) => {
+            if(err.response.status === 403){
+                alert('로그인 필요!');
+            }
+        })
+})
+</script>
+{% block script %}
+
+{% endblock %}
+
+</html>

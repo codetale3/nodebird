@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div id="join-inter">
+<form action="/auth/join" method="post" class="join-form">
+<div class="input-area">
+<label for="user-email">이메일</label>
+<input type="email" name="email" id="user-email" />
+<label for="user-nick">닉네임</label>
+<input type="text" name="nick" id="user-nick" />
+<label for="user-password">비밀번호</label>
+<input type="password" name="password" id="user-password" />
+<button class="btn-inter" type="submit">회원가입</button>
+</form>
+</div>
+{% endblock %}
+
+<!-- 회원가입 컨텐츠-->
